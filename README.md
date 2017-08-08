@@ -1,6 +1,6 @@
 ## install
 ```
-    bower install clipboardJs --save-dev
+bower install clipboardJs --save-dev
 ```
 #### html
 ```
