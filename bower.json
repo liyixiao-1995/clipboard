@@ -1,13 +1,15 @@
 {
-  "name": "clipboard",
+  "name": "clipboardjs",
   "homepage": "https://github.com/liyixiao-1995/clipboard",
   "authors": [
     "liyixiao <liyixiao@uinnova.com>"
   ],
-  "description": "",
-  "main": "",
+  "description": "复制粘贴简单api",
+  "main": "clipboardjs",
+  "keywords": [
+    "clipboardjs"
+  ],
   "license": "MIT",
-  "private": true,
   "ignore": [
     "**/.*",
     "node_modules",
