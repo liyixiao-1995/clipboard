@@ -4,7 +4,7 @@ bower install clipboardJs --save-dev
 ```
 #### html
 ```
-<script src="clipboard.js"></script>
+<script src="bower_components/clipboardjs/src/clipboard.js"></script>
 
 ```
 
