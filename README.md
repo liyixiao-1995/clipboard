@@ -1,9 +1,11 @@
 # clipboard
+#### html
 ```
 <script src="clipboard.js"></script>
 
 ```
 
+#### js
 ```
 var clipboard = new Clipboard();
 clipboard.addEventListener(document.body, {
