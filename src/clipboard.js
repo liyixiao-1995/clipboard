@@ -1,4 +1,4 @@
-function Clipboard(){
+function clipboardJs(){
     this.eventList = {};
     this.symbols = [];
 }
@@ -8,7 +8,7 @@ function Clipboard(){
  * @param element {Element} 获取此元素的事件列表
  * @returns {Number} 当前元素索引
  */
-Clipboard.prototype.getElementEvents = function(element){
+clipboardJs.prototype.getElementEvents = function(element){
     var i, res, len;
     len = this.symbols.length;
     for(i = 0; i < len; i++){
@@ -25,7 +25,7 @@ Clipboard.prototype.getElementEvents = function(element){
  * @param element {Element} 绑定事件的dom元素
  * @param obj {Object} 需要绑定的事件
  */
-Clipboard.prototype.addEventListener = function(element, obj){
+clipboardJs.prototype.addEventListener = function(element, obj){
     var i;
     this.clearEventListener(element);
     this.symbols.push([Symbol(), element]);
@@ -34,6 +34,8 @@ Clipboard.prototype.addEventListener = function(element, obj){
     for(i in obj){
         element.addEventListener(i, obj[i]);
     }
+
+    return element;
 };
 
 /**
@@ -41,7 +43,7 @@ Clipboard.prototype.addEventListener = function(element, obj){
  * @param element {Element} 需要清除事件的dom元素
  * @param obj ? {Object} 清除指定事件或清除所有事件并且在记录中清除它们
  */
-Clipboard.prototype.clearEventListener = function(element, obj){
+clipboardJs.prototype.clearEventListener = function(element, obj){
     var i;
     var eventAll = this.eventList[this.getElementEvents(element)];
     if(!obj){
@@ -59,7 +61,7 @@ Clipboard.prototype.clearEventListener = function(element, obj){
 /**
  * 清除所有事件
  */
-Clipboard.prototype.clearEvents = function(){
+clipboardJs.prototype.clearEvents = function(){
     var _this = this;
     this.symbols.forEach(function(item){
         _this.clearEventListener(item[1]);
@@ -72,9 +74,25 @@ Clipboard.prototype.clearEvents = function(){
  * @param e {Event} event 对象
  * @returns {ClipboardData|DataTransfer}
  */
-Clipboard.prototype.getClipboardData = function(e){
+clipboardJs.prototype.getClipboardData = function(e){
     e = e || event;
     return e.clipboardData || window.clipboardData;
+};
+
+/**
+ * 设置 复制的内容
+ * @param value {String}
+ */
+clipboardJs.prototype.setCopyValue = function(value){
+    this.copyValue = value;
+};
+
+/**
+ * 获取复制的你内容
+ * @returns {String|*}
+ */
+clipboardJs.prototype.getCopyValue = function(){
+    return  this.copyValue;
 };
 
 /**
@@ -82,10 +100,22 @@ Clipboard.prototype.getClipboardData = function(e){
  * @param e {Event}
  * @param text {String} 需要复制的字符串
  */
-Clipboard.prototype.copy = function(e, text){
+clipboardJs.prototype.copy = function(e, text){
+    if(typeof e === 'string'){
+
+        if(text && text && typeof text.focus === 'function'){
+            this.setCopyValue(e);
+            text.focus();
+            document.execCommand('copy');
+        }
+
+        return;
+    }
+
     var clipboardData = this.getClipboardData(e);
-    clipboardData.setData('Text', text);
+    clipboardData.setData('Text', text || this.getCopyValue());
     e.preventDefault();
+
 };
 
 /**
@@ -93,9 +123,19 @@ Clipboard.prototype.copy = function(e, text){
  * @param e {Event}
  * @param text {String} 需要剪切的字符串
  */
-Clipboard.prototype.cut = function(e, text){
+clipboardJs.prototype.cut = function(e, text){
+    if(typeof e === 'string'){
+
+        if(text && text && typeof text.focus === 'function'){
+            this.setCopyValue(e);
+            text.focus();
+            document.execCommand('cut');
+        }
+        return;
+    }
     var clipboardData = this.getClipboardData(e);
-    clipboardData.setData('Text', text);
+    clipboardData.setData('Text', text || this.getCopyValue());
+    document.execCommand("Delete");
     e.preventDefault();
 };
 
@@ -104,9 +144,26 @@ Clipboard.prototype.cut = function(e, text){
  * @param e {Event}
  * @returns {string} 粘贴的内容
  */
-Clipboard.prototype.getPaste = function(e){
+clipboardJs.prototype.getPaste = function(e){
     var clipboardData = this.getClipboardData(e);
     return clipboardData.getData('Text');
 };
 
+/**
+ * 粘贴
+ * @param element 粘贴到此元素
+ */
+clipboardJs.prototype.paste = function(element){
+    if(element){
+        element.focus();
+    }
 
+    document.execCommand("Paste");
+};
+
+/**
+ * 清除实例
+ */
+clipboardJs.prototype.destroy = function(){
+    this.clearEvents();
+};

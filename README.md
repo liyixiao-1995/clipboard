@@ -10,21 +10,28 @@ bower install clipboardJs --save-dev
 
 #### js
 ```
-var clipboard = new Clipboard();
-clipboard.addEventListener(document.body, {
+var clipboard = new clipboardJs();
+var element = document.querySelector('div');
+clipboard.addEventListener(element, {
      copy: function(e){
-         clipboard.copy(e, {String});
-     },
-     paste: function(e){
-         var text = clipboard.getPaste(e);
-         console.log(text);
+         if(!window.getSelection().toString()){
+             clipboard.copy(e);
+         }
      },
      cut: function(e){
-         clipboard.cut(e, {String});
+         if(!window.getSelection().toString()){
+             clipboard.cut(e);
+         }
      },
-     click: function(e){
-         document.execCommand('copy');
+     paste: function(e){
+         clipboard.paste();
+         var data = clipboard.getPaste(e);
+         console.log(data);
      }
  });
+ 
+ document.click = function(){
+    clipboard.copy('string', element);
+ }
  
 ```
