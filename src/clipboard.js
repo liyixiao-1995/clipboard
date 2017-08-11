@@ -4,6 +4,14 @@ function ClipboardJs(){
 }
 
 /**
+ * 判断是否为ie浏览器
+ * @returns {boolean}
+ */
+ClipboardJs.prototype. isIE = function() {
+    return !!window.ActiveXObject || "ActiveXObject" in window;
+};
+
+/**
  *  获取元素的事件列表
  * @param element {Element} 获取此元素的事件列表
  * @returns {Number} 当前元素索引
@@ -28,7 +36,13 @@ ClipboardJs.prototype.getElementEvents = function(element){
 ClipboardJs.prototype.addEventListener = function(element, obj){
     var i, _this = this;
     this.clearEventListener(element);
-    this.symbols.push([Symbol(), element]);
+    var symbol;
+    if(typeof Symbol === 'function'){
+        symbol = Symbol();
+    } else {
+        symbol = element.outerHTML;
+    }
+    this.symbols.push([symbol, element]);
 
     this.eventList[this.getElementEvents(element)] = obj;
     for(i in obj){
@@ -41,6 +55,44 @@ ClipboardJs.prototype.addEventListener = function(element, obj){
                 }, e);
             });
         })(i);
+    }
+
+    if(this.isIE()){
+        element.addEventListener('keydown', function(e){
+            e = e || event;
+            if(e.ctrlKey){
+                if(e.keyCode === 67){
+                    // 复制
+                    if(obj.copy){
+                        obj.copy(function(){
+                            _this['copy'](e);
+                        });
+                    }
+
+                }
+
+                if(e.keyCode === 88){
+                    // 剪切
+                    if(obj.cut){
+                        obj.cut(function(){
+                            _this['cut'](e);
+                        });
+                    }
+                }
+
+                if(e.keyCode === 86){
+                    // 粘贴
+                    if(obj.paste){
+                        obj.paste(function(){
+                            _this['paste'](e);
+                        });
+                    }
+                }
+            }
+
+
+            // console.log(e.keyCode);
+        });
     }
 
     return element;
@@ -84,6 +136,9 @@ ClipboardJs.prototype.clearEvents = function(){
  */
 ClipboardJs.prototype.getClipboardData = function(e){
     e = e || event;
+    if(!e){
+        e = {};
+    }
     return e.clipboardData || window.clipboardData;
 };
 
@@ -105,8 +160,8 @@ ClipboardJs.prototype.getCopyValue = function(){
 
 /**
  * 复制
- * @param e {Event}
- * @param text {String} 需要复制的字符串
+ * @param e? {Event}
+ * @param text? {String} 需要复制的字符串
  */
 ClipboardJs.prototype.copy = function(e, text){
     if(typeof e === 'string'){
@@ -121,14 +176,18 @@ ClipboardJs.prototype.copy = function(e, text){
 
     var clipboardData = this.getClipboardData(e);
     clipboardData.setData('Text', text || this.getCopyValue());
-    e.preventDefault();
+    // clipboardData.setData('Text', 'sss');
+
+    if(e){
+        e.preventDefault();
+    }
 
 };
 
 /**
  * 剪切
- * @param e {Event}
- * @param text {String} 需要剪切的字符串
+ * @param e? {Event}
+ * @param text? {String} 需要剪切的字符串
  */
 ClipboardJs.prototype.cut = function(e, text){
     if(typeof e === 'string'){
@@ -147,7 +206,7 @@ ClipboardJs.prototype.cut = function(e, text){
 
 /**
  * 获取粘贴的内容
- * @param e {ClipboardEvent}
+ * @param e? {ClipboardEvent}
  * @returns {string} 粘贴的内容
  */
 ClipboardJs.prototype.getPaste = function(e){
