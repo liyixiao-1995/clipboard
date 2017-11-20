@@ -11,6 +11,10 @@ ClipboardJs.prototype. isIE = function() {
     return !!window.ActiveXObject || "ActiveXObject" in window;
 };
 
+ClipboardJs.prototype.isMac = function(){
+    return navigator.appVersion.indexOf('Mac') > 0;
+};
+
 /**
  *  获取元素的事件列表
  * @param element {Element} 获取此元素的事件列表
@@ -33,7 +37,17 @@ ClipboardJs.prototype.getElementEvents = function(element){
  * @param element {Element} 绑定事件的dom元素
  * @param obj {Object} 需要绑定的事件
  */
-ClipboardJs.prototype.addEventListener = function(element, obj){
+ClipboardJs.prototype.addListeners = function(element, obj){
+
+    var addListener, on = '';
+    if (window.addEventListener) {
+        addListener = 'addEventListener';
+        on = '';
+    } else {
+        addListener = 'attachEvent';
+        on = 'on';
+    }
+
     var i, _this = this;
     this.clearEventListener(element);
     var symbol;
@@ -47,7 +61,7 @@ ClipboardJs.prototype.addEventListener = function(element, obj){
     this.eventList[this.getElementEvents(element)] = obj;
     for(i in obj){
         (function(index){
-            element.addEventListener(i, function(e){
+            element[addListener](on + i, function(e){
                 obj[index](function(){
                     if(_this[index]){
                         _this[index](e);
@@ -58,8 +72,11 @@ ClipboardJs.prototype.addEventListener = function(element, obj){
     }
 
     if(this.isIE()){
-        element.addEventListener('keydown', function(e){
+        element[addListener]('keydown', function(e){
             e = e || event;
+            if(_this.isMac()){
+                e.ctrlKey = e.metaKey;
+            }
             if(e.ctrlKey){
                 if(e.keyCode === 67){
                     // 复制
